@@ -27,11 +27,11 @@ const controlRecipes=async function(){
     await model.loadRecipe(id);
 
   //2)rendering recipie
- 
   recipeView.render(model.state.recipe);
   
   }catch(err){
-    alert(err);
+    recipeView.renderError();
+    console.error(err);
   }
 };
 ['hashchange','load'].forEach(ev=>window.addEventListener(ev,controlRecipes));
