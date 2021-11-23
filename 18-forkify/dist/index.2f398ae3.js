@@ -511,8 +511,15 @@ const controlPagination = function(goToPage) {
     //render the new pagination
     _paginationViewJsDefault.default.render(_modelJs.state.search);
 };
+const controlServings = function(newServings) {
+    //update recipe servings (in state)
+    _modelJs.updateServings(newServings);
+    //update the recipeview
+    _recipeviewJsDefault.default.render(_modelJs.state.recipe);
+};
 const init = function() {
     _recipeviewJsDefault.default.addHandlerRender(controlRecipes);
+    _recipeviewJsDefault.default.addHandlerUpdateServings(controlServings);
     _searchViewJsDefault.default.addHandlerSearch(controlSearchResults);
     _paginationViewJsDefault.default.addHandlerClick(controlPagination);
 }();
@@ -13601,6 +13608,8 @@ parcelHelpers.export(exports, "loadSearchResults", ()=>loadSearchResults
 );
 parcelHelpers.export(exports, "getSearchResultsPage", ()=>getSearchResultsPage
 );
+parcelHelpers.export(exports, "updateServings", ()=>updateServings
+);
 var _configJs = require("./config.js");
 var _helpersJs = require("../helpers.js");
 const state = {
@@ -13656,6 +13665,12 @@ const getSearchResultsPage = function(page = state.search.page) {
     const start = (page - 1) * _configJs.RES_PER_PAGE;
     const end = page * _configJs.RES_PER_PAGE;
     return state.search.results.slice(start, end);
+};
+const updateServings = function(newServings) {
+    state.recipe.ingredients.forEach((ing)=>{
+        ing.quantity = ing.quantity * newServings / state.recipe.servings;
+    });
+    state.recipe.servings = newServings;
 };
 
 },{"./config.js":"eHj11","../helpers.js":"cMrL7","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"eHj11":[function(require,module,exports) {
@@ -13717,6 +13732,14 @@ class RecipeView extends _viewJsDefault.default {
         ].forEach((ev)=>window.addEventListener(ev, recipies)
         );
     }
+    addHandlerUpdateServings(handler) {
+        this._parentElement.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn--update-servings');
+            if (!btn) return;
+            const { updateTo  } = +btn.dataset;
+            if (+updateTo > 0) handler(+updateTo);
+        });
+    }
     _generateMarkup() {
         return `
           <figure class="recipe__fig">
@@ -13742,12 +13765,12 @@ class RecipeView extends _viewJsDefault.default {
             <span class="recipe__info-text">servings</span>
 
             <div class="recipe__info-buttons">
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-update-to="${this._data.servings - 1}">
                 <svg>
                   <use href="${_iconsSvgDefault.default}#icon-minus-circle"></use>
                 </svg>
               </button>
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-update-to="${this._data.servings + 1}">
                 <svg>
                   <use href="${_iconsSvgDefault.default}#icon-plus-circle"></use>
                 </svg>
