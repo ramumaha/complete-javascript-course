@@ -2,6 +2,7 @@ import * as model from './view/model.js';
 import recipeView  from './view/recipeview.js';
 import resultsView  from './view/resultsView.js';
 import PaginationView  from './view/paginationView.js';
+import bookmarksView  from './view/bookmarksView.js';
 
 
 // import icons from '../img/icons.svg' //parcel
@@ -27,6 +28,8 @@ const controlRecipes=async function(){
     recipeView.renderSpinner();
     //0 update result vie to mark the selected results
     resultsView.render(model.getSearchResultsPage());
+    bookmarksView.update(model.state.bookmarks);
+
 
     //1)loading recipie
     await model.loadRecipe(id);
@@ -76,11 +79,22 @@ const controlServings=function(newServings){
   // recipeView.render(model.state.recipe);
   recipeView.update(model.state.recipe);
   
-
 }
+const controlAddBookmark =function(){
+  //add or remove bookamark
+  if(!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
+  else{model.deleteBookmark(model.state.recipe.id); }
+  //update recipe view
+  recipeView.update(model.state.recipe);
+
+  //render bookmark
+  bookmarksView.render(model.state.bookmarks);
+}
+
 const init=function(){
   recipeView.addHandlerRender(controlRecipes);
   recipeView.addHandlerUpdateServings(controlServings);
+  recipeView.addHandlerAddBookmark(controlAddBookmark);
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
   
